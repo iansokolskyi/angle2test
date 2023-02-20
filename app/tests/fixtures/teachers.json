@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "first_name": "Test",
+    "last_name": "Teacher1",
+    "degree": "PHD",
+    "user_id": 4
+  },
+  {
+    "id": 2,
+    "first_name": "Test",
+    "last_name": "Teacher2",
+    "degree": "PHD",
+    "user_id": 5
+  }
+]

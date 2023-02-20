@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "first_name": "Test",
+    "last_name": "Student1",
+    "entry_date": "2019-01-01",
+    "user_id": 2
+  },
+  {
+    "id": 2,
+    "first_name": "Test",
+    "last_name": "Student2",
+    "entry_date": "2019-01-01",
+    "user_id": 3
+  }
+]
