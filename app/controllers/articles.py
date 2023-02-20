@@ -37,7 +37,7 @@ async def create_article(
         if cover_image.content_type not in ("image/png", "image/jpeg"):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Invalid image format"
+                detail="Invalid image format",
             )
 
     db_session.add(article)
@@ -91,7 +91,9 @@ def get_own_article_by_id(
 def delete_own_article_by_id(article_id: int, user: User, db_session: Session) -> int:
     article = get_own_article_by_id(article_id, user, db_session)
     if article is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Article not found"
+        )
     db_session.delete(article)
     db_session.commit()
     return article_id

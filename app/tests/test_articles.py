@@ -78,12 +78,13 @@ def test_create_article(client):
         temp_file.write(b"test")
         temp_file.seek(0)
 
-        article_data = {
-            "title": "New Article",
-            "content": "New Article Content"
-        }
-        response = client.post("/articles", data=article_data, files={'cover_image': temp_file},
-                               headers=headers)
+        article_data = {"title": "New Article", "content": "New Article Content"}
+        response = client.post(
+            "/articles",
+            data=article_data,
+            files={"cover_image": temp_file},
+            headers=headers,
+        )
         os.remove(os.path.join(MEDIA_ROOT, os.path.basename(temp_file.name)))
     assert response.status_code == status.HTTP_201_CREATED
     article = ArticleSchema(**response.json())
@@ -97,15 +98,12 @@ def test_create_article_fails_with_wrong_file_type(client):
         temp_file.write(b"test")
         temp_file.seek(0)
 
-        article_data = {
-            "title": "New Article",
-            "content": "New Article Content"
-        }
+        article_data = {"title": "New Article", "content": "New Article Content"}
         response = client.post(
             "/articles",
             data=article_data,
-            files={'cover_image': temp_file},
-            headers=headers
+            files={"cover_image": temp_file},
+            headers=headers,
         )
         os.remove(os.path.join(MEDIA_ROOT, os.path.basename(temp_file.name)))
 
