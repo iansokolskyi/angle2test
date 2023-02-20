@@ -19,6 +19,7 @@ app = FastAPI(
     redoc_url=None,
 )
 
+# routes
 app.include_router(
     users.router,
     prefix="/users",
@@ -32,6 +33,8 @@ app.include_router(
     dependencies=[Depends(get_current_user)],
     responses={404: {"description": "Not found"}},
 )
+
+# static files
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
 app.mount("/storage", StaticFiles(directory=MEDIA_ROOT), name="storage")

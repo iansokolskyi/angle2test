@@ -26,13 +26,14 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine
 @pytest.fixture(scope="session")
 def db_session():
     # Create the database
-
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+    # Delete the database
     Base.metadata.drop_all(bind=engine)
     if os.path.exists(DB_FILENAME):
         os.remove(DB_FILENAME)
@@ -47,7 +48,5 @@ def client(db_session):
             db_session.close()
 
     app.dependency_overrides[get_db] = override_get_db
-
     load_fixtures(FIXTURES_DIR, db_session)
-
     yield TestClient(app)
