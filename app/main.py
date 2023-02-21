@@ -12,11 +12,11 @@ from app.models.routers import articles, users
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="FastAPI Base",
+    title="Test Task API",
     description="Angle2 Test Task API",
     version="0.0.1",
     docs_url="/docs",
-    redoc_url=None,
+    redoc_url="/docs/redoc",
 )
 
 # routes
