@@ -10,7 +10,7 @@ from fastapi import (
 from pydantic import parse_obj_as
 from sqlalchemy.orm import Session
 
-from app.controllers import (
+from app.controllers.articles import (
     create_article,
     get_students_articles,
     get_student_article_by_id,
@@ -18,7 +18,7 @@ from app.controllers import (
     delete_own_article_by_id,
     delete_article_by_id,
 )
-from app.controllers import get_all_articles
+from app.controllers.articles import get_all_articles
 from app.core.dependencies import get_db, get_current_user
 from app.core.enums import Role
 from app.models.users import User
