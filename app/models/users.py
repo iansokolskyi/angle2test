@@ -8,7 +8,7 @@ from sqlalchemy import (
     Enum,
     Table,
 )
-from sqlalchemy.orm import relationship, Session, mapped_column
+from sqlalchemy.orm import relationship, Session
 
 from app.core.db import Base
 from app.core.enums import Role, Degree
@@ -70,8 +70,8 @@ class Admin(Base):
 class Teacher(Base):
     __tablename__ = "teachers"
     id = Column(Integer, primary_key=True, index=True)
-    first_name = mapped_column(String, use_existing_column=True)
-    last_name = mapped_column(String, use_existing_column=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     degree = Column(Enum(Degree))
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="teacher")
@@ -83,8 +83,8 @@ class Teacher(Base):
 class Student(Base):
     __tablename__ = "students"
     id = Column(Integer, primary_key=True, index=True)
-    first_name = mapped_column(String, use_existing_column=True)
-    last_name = mapped_column(String, use_existing_column=True)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     entry_date = Column(Date, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="student")
