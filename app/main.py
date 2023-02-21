@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from app.core.db import engine, Base
 from app.core.dependencies import get_current_user
 from app.core.storage import MEDIA_ROOT
-from app.models.routers import articles, users
+from app.routers import users, articles
 
 Base.metadata.create_all(bind=engine)
 
