@@ -8,7 +8,6 @@ from sqlalchemy import (
     Enum,
     Table,
 )
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, Session, mapped_column
 
 from app.core.db import Base
@@ -29,9 +28,9 @@ class User(Base):
     def __repr__(self):
         return f"<{self.id}: {self.email}>"
 
-    @hybrid_property
+    @property
     def password(self):
-        return self._password
+        return self.hashed_password
 
     @password.setter
     def password(self, plain_password):
