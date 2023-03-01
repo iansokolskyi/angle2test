@@ -2,51 +2,44 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel, create_engine, Session
+from sqlmodel.pool import StaticPool
 
-from app.core.db import Base
-from app.core.dependencies import get_db
+from app.core.dependencies import get_session
 from app.main import app
 from .utils import load_fixtures
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 DB_FILENAME = "test.db"
-SQLALCHEMY_DATABASE_URL = f"sqlite:///./{DB_FILENAME}"
+DATABASE_URL = f"sqlite:///./{DB_FILENAME}"
 
 ADMIN_USER_ID = "1"
 TEACHER_USER_ID = "4"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 
-
-@pytest.fixture(scope="session")
-def db_session():
-    # Create the database
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@pytest.fixture(scope="session", name="session")
+def session_fixture():
+    engine = create_engine(
+        DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        yield session
 
     # Delete the database
-    Base.metadata.drop_all(bind=engine)
+    SQLModel.metadata.drop_all(bind=engine)
     if os.path.exists(DB_FILENAME):
         os.remove(DB_FILENAME)
 
 
-@pytest.fixture(scope="session")
-def client(db_session):
-    def override_get_db():
-        try:
-            yield db_session
-        finally:
-            db_session.close()
+@pytest.fixture(scope="session", name="client")
+def client_fixture(session: Session):
+    def get_session_override():
+        return session
 
-    app.dependency_overrides[get_db] = override_get_db
-    load_fixtures(FIXTURES_DIR, db_session)
-    yield TestClient(app)
+    app.dependency_overrides[get_session] = get_session_override
+    load_fixtures(FIXTURES_DIR, session)
+
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()

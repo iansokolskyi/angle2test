@@ -1,6 +1,6 @@
 from fastapi import status
 
-from app.schemas.users import UserSchema, StudentBaseSchema
+from app.models.users import UserRead, Student
 from .conftest import ADMIN_USER_ID, TEACHER_USER_ID
 
 
@@ -8,7 +8,7 @@ def test_get_own_profile(client):
     headers = {"user-id": ADMIN_USER_ID}
     response = client.get("/users/profile", headers=headers)
     assert response.status_code == status.HTTP_200_OK
-    user = UserSchema(**response.json())
+    user = UserRead(**response.json())
     assert user.email == "admin@test.com"
     assert user.profile.full_name is not None
 
@@ -44,7 +44,7 @@ def test_register_admin(client):
     }
     response = client.post("/users", json=user_data)
     assert response.status_code == status.HTTP_201_CREATED
-    user = UserSchema(**response.json())
+    user = UserRead(**response.json())
     assert user.email == "newadmin@example.com"
 
 
@@ -79,7 +79,7 @@ def test_register_teacher(client):
     }
     response = client.post("/users", json=user_data)
     assert response.status_code == status.HTTP_201_CREATED
-    user = UserSchema(**response.json())
+    user = UserRead(**response.json())
     assert user.email == "newteacher@test.com"
     assert user.profile.degree == "Bachelor"
 
@@ -98,7 +98,7 @@ def test_register_student(client):
     }
     response = client.post("/users", json=user_data)
     assert response.status_code == status.HTTP_201_CREATED
-    user = UserSchema(**response.json())
+    user = UserRead(**response.json())
     assert user.email == "newstudent@test.com"
     assert len(user.profile.teachers) > 0
 
@@ -139,6 +139,6 @@ def test_fetch_associated_students(client):
     headers = {"user-id": TEACHER_USER_ID}
     response = client.get("/users/students", headers=headers)
     assert response.status_code == status.HTTP_200_OK
-    students = [StudentBaseSchema(**student) for student in response.json()]
+    students = [Student(**student) for student in response.json()]
     assert len(students) > 0
     assert students[0].last_name == "Student1"

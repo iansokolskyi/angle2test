@@ -1,54 +1,39 @@
 from typing import Union, Type
 
 from fastapi import HTTPException
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 
-from app.models.users import User, profile_model_factory
-from app.schemas.users import (
-    UserCreateSchema,
-    Role,
-    profile_schema_factory,
-)
+from app.core.enums import Role
+from app.models.users import User, profile_model_factory, UserCreate, UserRead
 
 
-def get_user_by_id(user_id: int, db_session: Session) -> Union[User, None]:
-    return db_session.query(User).filter(User.id == user_id).first()
+def get_user_by_id(user_id: int, session: Session) -> Union[User, None]:
+    return session.get(User, user_id)
 
 
-def create_user(user: UserCreateSchema, db_session: Session) -> User:
-    if db_session.query(User).filter(User.email == user.email).first():
+def create_user(user: UserCreate, session: Session) -> UserRead:
+    instance = select(User).where(User.email == user.email)
+    if session.execute(instance).first():
         raise HTTPException(
             status_code=400, detail="User with this email already exists"
         )
 
-    user_data = user.dict()
-    profile_data = user_data.pop("profile")
+    password = user.dict().pop("password")
 
-    password = user_data.pop("password")
-    db_user = User(**user_data)
-    db_user.password = password
-    db_user = assign_profile_to_user(db_user, profile_data, db_session=db_session)
-    db_session.add(db_user)
-    db_session.commit()
-    db_session.refresh(db_user)
-    return db_user
-
-
-def assign_profile_to_user(user: User, profile_data: dict, db_session: Session) -> User:
-    try:
-        profile = profile_schema_factory(user.role)(**profile_data)
-    except ValidationError as e:
-        raise HTTPException(status_code=400, detail=e.errors())
-
-    db_profile = profile_model_factory(user.role, profile.dict(), db_session=db_session)
-    user.profile = db_profile
+    db_user = User.from_orm(user)
+    db_user.set_password(password)
+    profile = profile_model_factory(user.role, user.profile, session)
+    db_user.set_profile(profile)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    user = UserRead.from_orm(db_user)
     return user
 
 
-def get_users_by_role(role: Role, db_session: Session) -> list[Type[User]]:
-    return db_session.query(User).filter(User.role == role).all()
+def get_users_by_role(role: Role, session: Session) -> list[Type[User]]:
+    return session.query(User).filter(User.role == role).all()
 
 
-def get_all_users(db_session: Session) -> list[Type[User]]:
-    return db_session.query(User).all()
+def get_all_users(session: Session) -> list[Type[User]]:
+    return session.query(User).all()
