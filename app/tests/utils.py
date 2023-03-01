@@ -3,15 +3,14 @@ import os
 import re
 from datetime import datetime, date
 
-from sqlalchemy import MetaData, Table
-from sqlalchemy.orm import Session
+from sqlmodel import MetaData, Session, Table
 
 from app.core.db import engine
 
 
 def get_table_by_name(table_name: str) -> Table:
     """
-    It returns a SQLAlchemy Table object for the table with the given name
+    It returns a Table object for the table with the given name
 
     :param table_name: The name of the table you want to get the model for
     :return: The table object
@@ -41,30 +40,30 @@ def handle_datetime_fields(obj) -> dict:
     return obj
 
 
-def load_fixture_from_file(tablename: str, path, db_session: Session):
+def load_fixture_from_file(tablename: str, path, session: Session):
     """
     Loads fixture from a given file path
 
     :param tablename: The name of the table you want to load the fixture into
     :param path: The path to the JSON file containing the fixture data
-    :param db_session: The database session to use for the insert
+    :param session: The database session to use for the insert
     """
     with open(path, "r") as f:
         fixtures = json.load(f)
         for obj in fixtures:
             obj = handle_datetime_fields(obj)
-            model = get_table_by_name(tablename)
-            db_session.execute(model.insert().values(**obj))
-        db_session.commit()
+            table = get_table_by_name(tablename)
+            session.execute(table.insert().values(**obj))
+        session.commit()
 
 
-def load_fixtures(fixtures_dir, db_session: Session, fixture_files=None):
+def load_fixtures(fixtures_dir, session: Session, fixture_files=None):
     """
     It loads fixtures from a directory. Only loads fixtures that are in the `fixture_files` list,
     if provided.
 
     :param fixtures_dir: The directory where the fixtures are stored
-    :param db_session: The database session to use for loading the fixtures
+    :param session: The database session to use for loading the fixtures
     :param fixture_files: a list of fixture names to load. If None, all fixtures are loaded
     """
     if os.path.exists(fixtures_dir):
@@ -75,4 +74,4 @@ def load_fixtures(fixtures_dir, db_session: Session, fixture_files=None):
             selected = fixture_name in fixture_files if fixture_files else True
             if selected and supported:
                 path = os.path.join(fixtures_dir, file_name)
-                load_fixture_from_file(fixture_name, path, db_session)
+                load_fixture_from_file(fixture_name, path, session)

@@ -1,26 +1,27 @@
+from typing import TYPE_CHECKING
+
 from fastapi import Depends, HTTPException, Header
 from fastapi.security import SecurityScopes
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from app.controllers.users import get_user_by_id
-from app.core.db import DBSession
-from app.schemas.users import UserSchema
+from core.db import engine
+
+if TYPE_CHECKING:
+    from models.users import User
 
 
-def get_db():
-    db_session = DBSession()
-    try:
-        yield db_session
-    finally:
-        db_session.close()
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 
 async def get_current_user(
     user_id=Header(None),
-    db_session: Session = Depends(get_db),
+    session: Session = Depends(get_session),
     security_scopes: SecurityScopes = SecurityScopes(),
-) -> UserSchema:
+) -> "User":
     if user_id is None:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED,
@@ -36,7 +37,7 @@ async def get_current_user(
     )
     if user_id is None:
         raise credentials_exception
-    user = get_user_by_id(user_id, db_session)
+    user = get_user_by_id(user_id, session)
     if user is None:
         raise credentials_exception
     if security_scopes.scopes:
