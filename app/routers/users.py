@@ -43,4 +43,4 @@ async def fetch_own_students(
     user: User = Security(get_current_user, scopes=[Role.teacher]),
     session: Session = Depends(get_session),
 ) -> list[Student]:
-    return parse_obj_as(list[Student], user.profile.students)
+    return user.profile.students

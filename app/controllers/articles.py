@@ -66,7 +66,7 @@ def get_student_articles_query(teacher_id: int) -> SelectOfScalar:
 
 def get_students_articles(teacher_id: int, session: Session) -> list[Type[Article]]:
     query = get_student_articles_query(teacher_id)
-    return session.execute(query).scalars().all()
+    return session.exec(query).all()
 
 
 def get_student_article_by_id(
@@ -74,16 +74,16 @@ def get_student_article_by_id(
 ) -> Type[Article]:
     query = get_student_articles_query(teacher_id)
     query = query.filter(Article.id == article_id)
-    return session.execute(query).scalars().first()
+    return session.exec(query).first()
 
 
 def get_own_article_by_id(
     article_id: int, user: User, session: Session
 ) -> "Article":
-    return session.execute(
+    return session.exec(
         select(Article)
         .where(Article.id == article_id, Article.author_id == user.id)
-    ).scalars().first()
+    ).first()
 
 
 def delete_own_article_by_id(article_id: int, user: User, session: Session) -> int:

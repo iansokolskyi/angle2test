@@ -9,15 +9,16 @@ readme = "README.md"
 python = "^3.10"
 fastapi = "^0.92.0"
 uvicorn = "^0.20.0"
-sqlalchemy = "^2.0.3"
 environs = "^9.5.0"
 psycopg2-binary = "^2.9.5"
 alembic = "^1.9.4"
 python-multipart = "^0.0.5"
-black = {extras = ["d"], version = "^23.1.0"}
 pytest = "^7.2.1"
 httpx = "^0.23.3"
 pynput = "^1.7.6"
+ruff = "^0.0.251"
+sqlmodel = "^0.0.8"
+starlette-admin = "^0.5.3"
 
 
 [build-system]

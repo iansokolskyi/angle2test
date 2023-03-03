@@ -1,11 +1,11 @@
 import datetime
 import hashlib
 import uuid
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 
 from fastapi import HTTPException
 from pydantic import validator
-from sqlmodel import SQLModel, Field, Session, Relationship, select
+from sqlmodel import Field, Session, Relationship, select, SQLModel
 
 from app.core.enums import Role, Degree
 
@@ -28,9 +28,13 @@ class User(UserBase, table=True):
     student: "Student" = Relationship(back_populates="user",
                                       sa_relationship_kwargs={"uselist": False})
     articles: list["Article"] = Relationship(back_populates="author")
+    is_staff: bool = Field(default=False)
 
     def __repr__(self):
         return f"<{self.id}: {self.email}>"
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @property
     def profile(self):
@@ -55,7 +59,11 @@ class User(UserBase, table=True):
 
     def set_password(self, plain_password: str):
         salt = uuid.uuid4().hex
-        self.hashed_password = hashlib.sha512((plain_password + salt).encode()).hexdigest()
+        self.hashed_password = hashlib.sha512((plain_password).encode()).hexdigest() + salt
+
+    def check_password(self, plain_password: str) -> bool:
+        salt = self.hashed_password[-32:]
+        return self.hashed_password == hashlib.sha512((plain_password).encode()).hexdigest() + salt
 
 
 class UserRead(UserBase):
@@ -171,7 +179,7 @@ def profile_model_factory(role: Role, profile_data: ProfileCreate, session: Sess
         return Teacher.from_orm(profile_data)
     elif role == Role.student:
         query = select(Teacher).where(Teacher.id.in_(profile_data.teachers))
-        teachers = session.execute(query).scalars().all()
+        teachers = session.exec(query).all()
 
         if not teachers:
             raise HTTPException(

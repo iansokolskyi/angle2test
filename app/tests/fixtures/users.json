@@ -3,30 +3,35 @@
     "id": 1,
     "email": "admin@test.com",
     "hashed_password": "testtest1",
-    "role": "admin"
+    "role": "admin",
+    "is_staff": true
   },
   {
     "id": 2,
     "email": "student1@test.com",
     "hashed_password": "testtest1",
-    "role": "student"
+    "role": "student",
+    "is_staff": false
   },
   {
     "id": 3,
     "email": "student2@test.com",
     "hashed_password": "testtest1",
-    "role": "student"
+    "role": "student",
+    "is_staff": false
   },
   {
     "id": 4,
     "email": "teacher1@test.com",
     "hashed_password": "testtest1",
-    "role": "teacher"
+    "role": "teacher",
+    "is_staff": false
   },
   {
     "id": 5,
     "email": "teacher2@test.com",
     "hashed_password": "testtest1",
-    "role": "teacher"
+    "role": "teacher",
+    "is_staff": false
   }
 ]

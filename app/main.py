@@ -1,11 +1,11 @@
 import os
 
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.core.admin import admin
 from app.core.db import create_db_and_tables
-from app.core.dependencies import get_current_user
 from app.core.storage import MEDIA_ROOT
 from app.routers import users, articles
 
@@ -16,6 +16,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/docs/redoc",
 )
+# app.add_middleware(SessionMiddleware, , max_age=None)
 
 # routes
 app.include_router(
@@ -28,7 +29,6 @@ app.include_router(
     articles.router,
     prefix="/articles",
     tags=["articles"],
-    dependencies=[Depends(get_current_user)],
     responses={404: {"description": "Not found"}},
 )
 
@@ -36,6 +36,7 @@ app.include_router(
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
 app.mount("/storage", StaticFiles(directory=MEDIA_ROOT), name="storage")
+admin.mount_to(app)
 
 
 @app.on_event("startup")
